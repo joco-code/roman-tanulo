@@ -1,0 +1,125 @@
+import os
+from gtts import gTTS
+import platform
+import subprocess
+
+# A három lecke szótára magyar-román párokkal
+leckek = {
+    "1. Lecke: Eu și familia mea (Családunk)": {
+        "anya": "mama",
+        "apa": "tata",
+        "fiútestvér": "frate",
+        "lánytestvér": "sora",
+        "nagymama": "bunica",
+        "nagypapa": "bunic",
+        "kislány": "fetiță",
+        "kisfiú": "băiat"
+    },
+    "2. Lecke: Locuința mea (Lakásunk)": {
+        "konyha": "bucătărie",
+        "hálószoba": "dormitor",
+        "nappali": "cameră de zi",
+        "fürdőszoba": "baie",
+        "egy asztal": "o masă",
+        "egy szék": "un scaun",
+        "egy aragáz": "un aragaz",
+        "egy hűtőszekrény": "un frigider",
+        "egy szekrény": "un dulap",
+        "egy fürdőkád": "o cadă",
+        "egy tükör": "o oglindă",
+        "egy mosdókagyló": "o chiuvetă",
+        "egy mosógép": "o mașină de spălat",
+        "egy wc": "un WC",
+        "egy kanapé": "o canapea",
+        "egy televízió": "un televizor",
+        "egy szőnyeg": "un covor",
+        "egy polc": "un raft",
+        "egy lámpa": "o lampă",
+        "egy párna": "o pernă",
+        "egy paplan": "o plapumă",
+        "egy ágy": "un pat"
+    },
+    "3. Lecke: Camera mea (Szobám és Játékok)": {
+        "egy labda": "o minge",
+        "egy baba": "o păpuşă",
+        "egy játékautó": "o maşinuţă",
+        "egy kismackó": "un ursuleţ",
+        "egy repülő": "un avion",
+        "egy kisvonat": "un trenuleţ",
+        "egy lufi": "un balon",
+        "egy robot": "un robot",
+        "egy dinoszaurusz": "un dinozaur",
+        "egy lego játék": "un joc Lego",
+        "egy kocka": "cuburi",
+        "egy íróasztal": "un birou",
+        "egy számítógép": "un calculator",
+        "egy könyv": "o carte"
+    }
+}
+
+def hangot_lejatszik(szoveg, nyelv):
+    """Létrehoz egy átmeneti hangfájlt és lejátsza."""
+    try:
+        tts = gTTS(text=szoveg, lang=nyelv, slow=False)
+        fajlnev = "temp_hang.mp3"
+        tts.save(fajlnev)
+        
+        # Operációs rendszer szerinti lejátszás
+        if platform.system() == "Darwin": # macOS
+            subprocess.run(["afplay", fajlnev])
+        elif platform.system() == "Windows":
+            os.system(f"start {fajlnev}")
+        else: # Linux
+            subprocess.run(["mpg123", fajlnev])
+    except Exception as e:
+        print(f"Hiba a hang lejátszásakor: {e}")
+
+def main():
+    print("=== ROMÁN-MAGYAR TANULÓ PROGRAM ===")
+    while True:
+        print("\nVálassz leckét:")
+        lecke_kulcsok = list(leckek.keys())
+        for i, lecke in enumerate(lecke_kulcsok, 1):
+            print(f"{i}. {lecke}")
+        print("0. Kilépés")
+        
+        valasztas = input("\nAdd meg a lecke számát: ")
+        if valasztas == "0":
+lecs		    ak ("Viszlát! Pa!")
+            break
+        
+        try:
+            valasztott_lecke = lecke_kulcsok[int(valasztas) - 1]
+            szavak = leckek[valasztott_lecke]
+        except (ValueError, IndexError):
+            print("Érvénytelen választás, próbáld újra!")
+            continue
+            
+        while True:
+            print(f"\n--- {valasztott_lecke} ---")
+            szo_kulcsok = list(szavak.keys())
+            for i, magyar in enumerate(szo_kulcsok, 1):
+                print(f"{i}. {magyar} = {szavak[magyar]}")
+            print("0. Vissza a leckékhez")
+            
+            szo_valasztas = input("\nVálassz egy szót a kiejtéshez (szám): ")
+            if szo_valasztas == "0":
+                break
+                
+            try:
+                magyar_szo = szo_kulcsok[int(szo_valasztas) - 1]
+                 roman_szo = szavak[magyar_szo]
+                
+                print(f"\nKifejezés: {magyar_szo} (Magyarul) / {roman_szo} (Románul)")
+                
+                print("-> Magyar kiejtés...")
+                hangot_lejatszik(magyar_szo, "hu")
+                
+                print("-> Román kiejtés...")
+                hangot_lejatszik(roman_szo, "ro")
+                
+            except (ValueError, IndexError):
+                print("Érvénytelen szó választás!")
+
+if __name__ == "__main__":
+    main()
