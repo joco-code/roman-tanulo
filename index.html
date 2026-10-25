@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Román-Magyar Szókincs Tanuló</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 { color: #1a73e8; font-size: 24px; }
+        .card {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            background-color: #f8f9fa;
+        }
+        .hu { font-weight: bold; font-size: 18px; color: #d93025; }
+        .ro { font-size: 16px; color: #188038; margin-top: 5px; }
+        .btn {
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .btn:hover { background-color: #1557b0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="menu-view">
+        <h1>Válassz leckét a gyakorláshoz!</h1>
+        <div class="card" onclick="valasszLecket(0)">
+            <h2>1. Lecke</h2>
+            <p>Eu și familia mea (Család)</p>
+        </div>
+        <div class="card" onclick="valasszLecket(1)">
+            <h2>2. Lecke</h2>
+            <p>Locuința mea (Lakásunk)</p>
+        </div>
+        <div class="card" onclick="valasszLecket(2)">
+            <h2>3. Lecke</h2>
+            <p>Camera mea (Szoba és Játékok)</p>
+        </div>
+    </div>
+
+    <div id="lesson-view" class="hidden">
+        <h1 id="lesson-title">Lecke</h1>
+        <div id="word-list"></div>
+        <button class="btn" onclick="visszaAfooldalra()">⬅ Vissza a leckékhez</button>
+    </div>
+
+    <script>
+        const leckek = [
+            {
+                nev: "1. Lecke: Család",
+                szavak: [
+                    { hu: "anya", ro: "mama" },
+                    { hu: "apa", ro: "tata" },
+                    { hu: "fiútestvér", ro: "frate" },
+                    { hu: "lánytestvér", ro: "sora" },
+                    { hu: "nagymama", ro: "bunica" },
+                    { hu: "nagypapa", ro: "bunic" },
+                    { hu: "kislány", ro: "fetiță" },
+                    { hu: "kisfiú", ro: "băiat" }
+                ]
+            },
+            {
+                nev: "2. Lecke: Lakásunk",
+                szavak: [
+                    { hu: "konyha", ro: "bucătărie" },
+                    { hu: "hálószoba", ro: "dormitor" },
+                    { hu: "nappali", ro: "cameră de zi" },
+                    { hu: "fürdőszoba", ro: "baie" },
+                    { hu: "egy asztal", ro: "o masă" },
+                    { hu: "egy szék", ro: "un scaun" },
+                    { hu: "egy aragáz", ro: "un aragaz" },
+                    { hu: "egy hűtőszekrény", ro: "un frigider" },
+                    { hu: "egy szekrény", ro: "un dulap" },
+                    { hu: "egy fürdőkád", ro: "o cadă" },
+                    { hu: "egy tükör", ro: "o oglindă" },
+                    { hu: "egy mosdókagyló", ro: "o chiuvetă" },
+                    { hu: "egy mosógép", ro: "o mașină de spălat" },
+                    { hu: "egy wc", ro: "un WC" },
+                    { hu: "egy kanapé", ro: "o canapea" },
+                    { hu: "egy televízió", ro: "un televizor" },
+                    { hu: "egy szőnyeg", ro: "un covor" },
+                    { hu: "egy polc", ro: "un raft" },
+                    { hu: "egy lámpa", ro: "o lampă" },
+                    { hu: "egy párna", ro: "o pernă" },
+                    { hu: "egy paplan", ro: "o plapumă" },
+                    { hu: "egy ágy", ro: "un pat" }
+                ]
+            },
+            {
+                nev: "3. Lecke: Szoba és Játékok",
+                szavak: [
+                    { hu: "egy labda", ro: "o minge" },
+                    { hu: "egy baba", ro: "o păpuşă" },
+                    { hu: "egy játékautó", ro: "o maşinuţă" },
+                    { hu: "egy kismackó", ro: "un ursuleţ" },
+                    { hu: "egy repülő", ro: "un avion" },
+                    { hu: "egy kisvonat", ro: "un trenuleţ" },
+                    { hu: "egy lufi", ro: "un balon" },
+                    { hu: "egy robot", ro: "un robot" },
+                    { hu: "egy dinoszaurusz", ro: "un dinozaur" },
+                    { hu: "egy lego játék", ro: "un joc Lego" },
+                    { hu: "egy kocka", ro: "cuburi" },
+                    { hu: "egy íróasztal", ro: "un birou" },
+                    { hu: "egy számítógép", ro: "un calculator" },
+                    { hu: "egy könyv", ro: "o carte" }
+                ]
+            }
+        ];
+
+        function beszél(szöveg, nyelv) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Előző leállítása
+                let utterance = new SpeechSynthesisUtterance(szöveg);
+                utterance.lang = nyelv === 'hu' ? 'hu-HU' : 'ro-RO';
+                utterance.rate = 0.9; // Kicsit lassabb a tanuláshoz
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function valasszLecket(index) {
+            const lecke = leckek[index];
+            document.getElementById('lesson-title').innerText = lecke.nev;
+            
+            let html = "";
+            lecke.szavakforEach = lecke.szavak.forEach((szo, i) => {
+                html += `
+                    <div class="card" onclick="beszél('${szo.hu}', 'hu'); setTimeout(() => beszél('${szo.ro}', 'ro'), 1200);">
+                        <div class="hu">🇭🇺 ${szo.hu}</div>
+                        <div class="ro">🇷🇴 ${szo.ro}</div>
+                        <p style="font-size: 12px; color: #666; margin: 5px 0 0 0;">(Kattints a hallgatáshoz)</p>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('word-list').innerHTML = html;
+            document.getElementById('menu-view').classList.add('hidden');
+            document.getElementById('lesson-view').classList.remove('hidden');
+        }
+
+        function visszaAfooldalra() {
+            window.speechSynthesis.cancel();
+            document.getElementById('lesson-view').classList.add('hidden');
+            document.getElementById('menu-view').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
